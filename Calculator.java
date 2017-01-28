@@ -98,6 +98,7 @@ public class Calculator{
 		return false;
 	}
 	
+	//Get Precedence of Operators
 	private static int getPrecedence(char operator) {
           int precision = 0;
           if (operator == '-' || operator == '+') {
