@@ -1,97 +1,92 @@
 /*
- * Calculator Library
+ * Calculator Library:
+ * This class computes arithmetic 
+ * expressions at once considering order 
+ * of operations using stack
+ * 
  * Author: Archana Injineri
  */
-package sparkcental;
+package src.com.sparkcental.calc;
 
-import java.util.Scanner;
 import java.util.Stack;
 
 public class Calculator{
-
-	private static Scanner scanner;
-
-	public static void main(String[] args){		
-		Calculator calcObj = new Calculator();
-		scanner = new Scanner(System.in);
-		System.out.println("Enter the Infix Expression here ");
-		String expression = scanner.next();
 		
-		//Covert Infix to postfix Expression
-		String postfixExpression = convertToPostfix(expression);
-
-		System.out.println("Expression "+expression+" is evaluated to " + calcObj.evalExpression(postfixExpression));
-	}
-	
 	//Evaluates the Postfix Expression
 	public int evalExpression(String postfixExpr){
-        char[] chars = postfixExpr.toCharArray();
-        Stack<Integer> stack = new Stack<Integer>();
-        for (char c : chars) {
-                if (isOperand(c)) {
-                        stack.push(c - '0'); 
-                } else if (isOperator(c)) {
-                        int op1 = stack.pop();
-                        int op2 = stack.pop();
+        char[] postExprCharArr = postfixExpr.toCharArray();
+        Stack<Integer> operandStack = new Stack<Integer>();
+        for (char ch : postExprCharArr) {
+                if (isOperand(ch)) {
+                	//Converts char to int
+                	operandStack.push(ch - '0'); 
+                } else if (isOperator(ch)) {
+                		//pop top two elements & perform operations
+                        int operand1 = operandStack.pop();
+                        int operand2 = operandStack.pop();
                         int result;
-                        switch (c) {
+                        switch (ch) {
                         case '*':
-                                result = op1 * op2;
-                                stack.push(result);
+                                result = operand2 * operand1;
+                                operandStack.push(result);
                                 break;
                         case '/':
-                                result = op2 / op1;
-                                stack.push(result);
+                                result = operand2 / operand1;
+                                operandStack.push(result);
                                 break;
                         case '+':
-                                result = op1 + op2;
-                                stack.push(result);
+                                result = operand2 + operand1;
+                                operandStack.push(result);
                                 break;
                         case '-':
-                                result = op2 - op1;
-                                stack.push(result);
+                                result = operand2 - operand1;
+                                operandStack.push(result);
                                 break;
                         }
                 }
         }
-        return stack.pop();
+        //return last element of stack which is final result
+        return operandStack.pop();
 	}
 
-	//Convert to Postfix expression
-	public static String convertToPostfix(String infixExpression){
-		char[] chars = infixExpression.toCharArray();
-        Stack<Character> stack = new Stack<Character>();
-        StringBuilder out = new StringBuilder(infixExpression.length());
+	//Convert Infix to Postfix expression
+	public  String convertToPostfix(String infixExpression){
+		char[] infExprCharArr = infixExpression.toCharArray();
+        Stack<Character> operatorStack = new Stack<Character>();
+        StringBuilder postExprStrBldr = new StringBuilder(infixExpression.length());
 
-        for (char c : chars) {
-                if (isOperator(c)) {
-                        while (!stack.isEmpty()) {
-                                if (checkGraterOrEqual(stack.peek(), c)) {
-                                        out.append(stack.pop());
+        for (char ch : infExprCharArr) {
+                if (isOperator(ch)) {
+                		//pop elements from stack till stack is empty
+                        while (!operatorStack.isEmpty()) {                        	
+                        	//check operator precedence
+                                if (isHigherPrecedence(operatorStack.peek(), ch)) {
+                                	postExprStrBldr.append(operatorStack.pop());
                                 } else {
                                         break;
                                 }
                         }
-                        stack.push(c);
-                }  else if (isOperand(c)) {
-                        out.append(c);
+                        operatorStack.push(ch);
+                }  else if (isOperand(ch)) {
+                	postExprStrBldr.append(ch);
                 }
         }
-        while (!stack.empty()) {
-                out.append(stack.pop());
+        // pop remaining elements of stack
+        while (!operatorStack.empty()) {
+        	postExprStrBldr.append(operatorStack.pop());
         }
-        System.out.println("Postfix Expression is : "+ out.toString());
-         return out.toString();
+        System.out.println("Postfix Expression is : "+ postExprStrBldr.toString());
+         return postExprStrBldr.toString();
 	}
 	
-	public static boolean isOperator(char c){
-		if("+-*/".indexOf(c) != -1){
+	public  boolean isOperator(char ch){
+		if("+-*/".indexOf(ch) != -1){
 			return true;
 		}	
 		return false;
 	}
 	
-	public static boolean isOperand(char c){
+	public  boolean isOperand(char c){
 		if("0123456789".indexOf(c) != -1){
 			return true;
 		}
@@ -99,7 +94,7 @@ public class Calculator{
 	}
 	
 	//Get Precedence of Operators
-	private static int getPrecedence(char operator) {
+	private  int getPrecedence(char operator) {
           int precision = 0;
           if (operator == '-' || operator == '+') {
         	  precision = 1;
@@ -109,8 +104,9 @@ public class Calculator{
           return precision;
   }
 
-	private static boolean checkGraterOrEqual(char op1, char op2) {
-         return getPrecedence(op1) >= getPrecedence(op2);
+	// compare the precedence of input operator to the stack top
+	private  boolean isHigherPrecedence(char inputOp, char stackTopOp) {
+         return getPrecedence(inputOp) >= getPrecedence(stackTopOp);
 	}
 	
 }
